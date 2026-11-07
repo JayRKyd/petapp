@@ -335,6 +335,12 @@ export function BookingFlow({ availability }: { availability: Availability }) {
             {nextButton}
           </div>
         )}
+        {step !== 'done' && (
+          <div className="hidden items-center justify-between gap-4 border-t px-8 py-4 md:flex">
+            <span className="text-sm text-muted-foreground">{hint}</span>
+            <div className="w-56">{nextButton}</div>
+          </div>
+        )}
       </div>
 
       <aside className="sticky top-6 hidden flex-col gap-3 rounded-2xl border bg-card p-5 md:flex" aria-label="Your booking">
@@ -347,12 +353,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
           <dt className="text-muted-foreground">Pet</dt><dd className="text-right font-semibold">{petName || '–'}</dd>
           <dt className="text-muted-foreground">Price</dt><dd className="text-right font-semibold tabular-nums">{service ? `$${price}` : '–'}</dd>
         </dl>
-        {step !== 'done' && (
-          <div className="flex flex-col gap-2 border-t pt-3">
-            <p className="text-xs text-muted-foreground">{step === 'details' ? BUSINESS.payment : hint}</p>
-            {nextButton}
-          </div>
-        )}
+        {step !== 'done' && <p className="border-t pt-3 text-xs text-muted-foreground">{BUSINESS.payment}</p>}
       </aside>
     </>
   );
