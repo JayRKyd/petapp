@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { ChevronLeft, Loader2, PawPrint } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, PawPrint } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BUSINESS, hoursLine } from '@/lib/business';
-import { formatDay, weekdayShort, dayOfMonth } from '@/lib/dates';
+import { addDays, formatDay, weekdayShort, dayOfMonth } from '@/lib/dates';
+import type { DayAvailability } from '../slots';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { requestBooking } from '../actions';
@@ -206,7 +207,10 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                   </button>
                 </div>
               )}
-              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-8 md:px-8">
+              <div className="hidden md:block">
+                <MonthCalendar days={availability.days} selected={date} freeCount={freeCount} onPick={(d) => { setDate(d); setStart(null); }} />
+              </div>
+              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:hidden">
                 {availability.days.map((d) => {
                   const n = freeCount(d);
                   return (
@@ -229,7 +233,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                 })}
               </div>
               {day ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 md:mt-1">
                   <div className="text-xs font-bold text-muted-foreground">{formatDay(day.date)}</div>
                   <div className="grid grid-cols-3 gap-2 md:grid-cols-6 xl:grid-cols-8">
                     {slots.map((s) => (
@@ -380,6 +384,84 @@ function Summary({ service, size, price, when, minutes, total }: { service: stri
           <b className="font-display tabular-nums">${price}</b>
         </div>
       )}
+    </div>
+  );
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/**
+ * A month at a time, the way desktop booking sites do it. Days outside the
+ * booking window are greyed out; open days show how many times are free.
+ */
+function MonthCalendar({
+  days,
+  selected,
+  freeCount,
+  onPick,
+}: {
+  days: DayAvailability[];
+  selected: string | null;
+  freeCount: (d: DayAvailability) => number;
+  onPick: (date: string) => void;
+}) {
+  const byDate = useMemo(() => new Map(days.map((d) => [d.date, d])), [days]);
+  const months = useMemo(() => Array.from(new Set(days.map((d) => d.date.slice(0, 7)))), [days]);
+  const [month, setMonth] = useState(() => (selected ? selected.slice(0, 7) : months[0]));
+  const index = months.indexOf(month);
+  const [y, m] = month.split('-').map(Number);
+  const first = `${month}-01`;
+  const firstWeekday = new Date(`${first}T12:00:00Z`).getUTCDay();
+  const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const cells: (string | null)[] = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(addDays(first, d - 1));
+  while (cells.length % 7) cells.push(null);
+
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border p-4">
+      <div className="flex items-center justify-between">
+        <button type="button" className="rounded-lg border p-1.5 disabled:opacity-30" disabled={index <= 0} onClick={() => setMonth(months[index - 1])} aria-label="Previous month">
+          <ChevronLeft className="size-4" />
+        </button>
+        <div className="font-display text-base font-bold">
+          {MONTHS[m - 1]} {y}
+        </div>
+        <button type="button" className="rounded-lg border p-1.5 disabled:opacity-30" disabled={index >= months.length - 1} onClick={() => setMonth(months[index + 1])} aria-label="Next month">
+          <ChevronRight className="size-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((w) => (
+          <div key={w} className="py-1">{w}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((date, i) => {
+          if (!date) return <div key={`empty-${i}`} />;
+          const d = byDate.get(date);
+          const n = d ? freeCount(d) : 0;
+          const open = !!d && !d.closed && n > 0;
+          const isSelected = date === selected;
+          return (
+            <button
+              key={date}
+              type="button"
+              disabled={!open}
+              aria-pressed={isSelected}
+              onClick={() => onPick(date)}
+              title={!d ? 'Not open for online booking' : d.closed ? 'Closed' : n ? `${n} free times` : 'Full'}
+              className={cn(
+                'flex h-14 flex-col items-center justify-center gap-0.5 rounded-xl border-[1.5px] leading-none',
+                isSelected ? 'border-primary bg-primary text-primary-foreground' : open ? 'bg-card hover:border-primary' : 'border-transparent text-muted-foreground/60',
+              )}
+            >
+              <span className="font-display text-base font-bold">{dayOfMonth(date)}</span>
+              <span className={cn('text-[10px]', isSelected ? 'opacity-85' : 'text-muted-foreground')}>{!d ? '' : d.closed ? 'closed' : n ? `${n} free` : 'full'}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
