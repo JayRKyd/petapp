@@ -278,7 +278,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                 <Field label="Your name" id="b-name" error={tried && name.trim().length < 2 ? 'Enter your name' : null}>
                   <Input id="b-name" className="h-11" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
                 </Field>
-                <Field label="Phone" hint="WhatsApp if you have it" id="b-phone" error={tried && !phoneOk ? 'A number we can reach you on' : null}>
+                <Field label="Phone" id="b-phone" error={tried && !phoneOk ? 'A number we can reach you on' : null}>
                   <Input id="b-phone" className="h-11" type="tel" inputMode="tel" autoComplete="tel" placeholder="242" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 </Field>
               </div>
