@@ -62,7 +62,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
   function go(to: Step) {
     setStep(to);
     setError(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function book() {
@@ -98,11 +98,27 @@ export function BookingFlow({ availability }: { availability: Availability }) {
   }
 
   const stepIndex = { service: 1, time: 2, details: 3, done: 3 }[step];
+  const hint = step === 'service' ? (service ? `${service.name} · ${formatDuration(minutes)}` : 'Pick a service to carry on') : step === 'time' ? (when ?? 'Pick a day and time') : BUSINESS.payment;
+  const nextButton =
+    step === 'service' ? (
+      <Button type="button" className="h-12 text-base" disabled={!service} onClick={() => go('time')}>
+        Choose a time
+      </Button>
+    ) : step === 'time' ? (
+      <Button type="button" className="h-12 text-base" disabled={!when} onClick={() => go('details')}>
+        Your details
+      </Button>
+    ) : step === 'details' ? (
+      <Button type="button" className="h-12 text-base" disabled={pending} onClick={book}>
+        {pending && <Loader2 className="animate-spin" />}
+        Book it
+      </Button>
+    ) : null;
 
   return (
     <>
-      <div className="flex min-h-dvh w-full flex-col bg-card md:min-h-0 md:w-[430px] md:shrink-0 md:rounded-3xl md:border md:shadow-sm">
-        <header className="flex flex-col gap-1 bg-gradient-to-b from-accent to-transparent px-5 pb-3 pt-6">
+      <div className="flex min-h-dvh w-full min-w-0 flex-col bg-card md:min-h-[560px] md:rounded-2xl md:border md:shadow-sm">
+        <header className="flex flex-col gap-1 bg-gradient-to-b from-accent to-transparent px-5 pb-3 pt-6 md:hidden">
           <div className="flex items-center gap-2.5 font-display text-xl font-bold">
             <span className="grid size-8 place-items-center rounded-full bg-primary text-primary-foreground">
               <PawPrint className="size-4" />
@@ -114,14 +130,14 @@ export function BookingFlow({ availability }: { availability: Availability }) {
           </p>
         </header>
         {step !== 'done' && (
-          <div className="flex gap-1.5 px-5 pb-4" aria-hidden>
+          <div className="flex gap-1.5 px-5 pb-4 md:pt-5" aria-hidden>
             {[1, 2, 3].map((n) => (
               <span key={n} className={cn('h-1.5 flex-1 rounded-full', n <= stepIndex ? 'bg-primary' : 'bg-border')} />
             ))}
           </div>
         )}
 
-        <div className="flex flex-1 flex-col gap-5 px-5 pb-5">
+        <div className="flex flex-1 flex-col gap-5 px-5 pb-5 md:px-7 md:pb-7">
           {step === 'service' && (
             <>
               <h1 className="text-2xl font-semibold">What does your pet need?</h1>
@@ -145,7 +161,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-bold text-muted-foreground">Service</div>
-                <div className="flex flex-col gap-2.5" role="radiogroup" aria-label="Service">
+                <div className="grid gap-2.5 md:grid-cols-2" role="radiogroup" aria-label="Service">
                   {SERVICES.map((s) => (
                     <button
                       key={s.id}
@@ -190,7 +206,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                   </button>
                 </div>
               )}
-              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-7 md:px-7">
                 {availability.days.map((d) => {
                   const n = freeCount(d);
                   return (
@@ -215,7 +231,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
               {day ? (
                 <div className="flex flex-col gap-2">
                   <div className="text-xs font-bold text-muted-foreground">{formatDay(day.date)}</div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
                     {slots.map((s) => (
                       <button
                         key={s.start}
@@ -303,34 +319,17 @@ export function BookingFlow({ availability }: { availability: Availability }) {
         </div>
 
         {step !== 'done' && (
-          <div className="sticky bottom-0 flex flex-col gap-2 border-t bg-card px-5 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3 md:rounded-b-3xl">
+          <div className="sticky bottom-0 flex flex-col gap-2 border-t bg-card px-5 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3 md:hidden">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>
-                {step === 'service' ? (service ? `${service.name} · ${formatDuration(minutes)}` : 'Pick a service') : step === 'time' ? (when ?? 'Pick a day and time') : BUSINESS.payment}
-              </span>
+              <span>{hint}</span>
               {service && <b className="font-display text-base text-foreground tabular-nums">${price}</b>}
             </div>
-            {step === 'service' && (
-              <Button type="button" className="h-12 text-base" disabled={!service} onClick={() => go('time')}>
-                Choose a time
-              </Button>
-            )}
-            {step === 'time' && (
-              <Button type="button" className="h-12 text-base" disabled={!when} onClick={() => go('details')}>
-                Your details
-              </Button>
-            )}
-            {step === 'details' && (
-              <Button type="button" className="h-12 text-base" disabled={pending} onClick={book}>
-                {pending && <Loader2 className="animate-spin" />}
-                Book it
-              </Button>
-            )}
+            {nextButton}
           </div>
         )}
       </div>
 
-      <aside className="sticky top-6 hidden w-[280px] shrink-0 flex-col gap-3 rounded-2xl border bg-card p-5 md:flex" aria-label="Your booking">
+      <aside className="sticky top-6 hidden flex-col gap-3 rounded-2xl border bg-card p-5 md:flex" aria-label="Your booking">
         <h2 className="text-base font-semibold">Your booking</h2>
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-sm">
           <dt className="text-muted-foreground">Size</dt><dd className="text-right font-semibold">{sizeLabel(size)}</dd>
@@ -338,8 +337,14 @@ export function BookingFlow({ availability }: { availability: Availability }) {
           <dt className="text-muted-foreground">Takes</dt><dd className="text-right font-semibold">{service ? formatDuration(minutes) : '–'}</dd>
           <dt className="text-muted-foreground">When</dt><dd className="text-right font-semibold">{when ?? '–'}</dd>
           <dt className="text-muted-foreground">Pet</dt><dd className="text-right font-semibold">{petName || '–'}</dd>
-          <dt className="text-muted-foreground">Price</dt><dd className="text-right font-semibold tabular-nums">{service ? `$${price}` : '–'}</dd>
+          <dt className="text-muted-foreground">Price</dt><dd className="text-right font-semibold tabular-nums">{service ? `${price}` : '–'}</dd>
         </dl>
+        {step !== 'done' && (
+          <div className="flex flex-col gap-2 border-t pt-3">
+            <p className="text-xs text-muted-foreground">{step === 'details' ? BUSINESS.payment : hint}</p>
+            {nextButton}
+          </div>
+        )}
       </aside>
     </>
   );
