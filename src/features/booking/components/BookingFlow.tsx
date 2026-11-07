@@ -338,7 +338,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
         {step !== 'done' && (
           <div className="hidden items-center justify-between gap-4 border-t px-8 py-4 md:flex">
             <span className="text-sm text-muted-foreground">{hint}</span>
-            <div className="w-56">{nextButton}</div>
+            <div className="w-56 [&>button]:w-full">{nextButton}</div>
           </div>
         )}
       </div>
