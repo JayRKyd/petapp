@@ -21,7 +21,20 @@ import { Chip, Field } from './bits';
  * The owner books for a walk-in or a phone call: client (existing or new),
  * pet, size, service, any free time from today on. Confirmed straight away.
  */
-export function BookSheet({ open, context, initialDate, onClose }: { open: boolean; context: BookingContext; initialDate?: string | null; onClose: () => void }) {
+export function BookSheet({
+  open,
+  context,
+  initialDate,
+  initialClientId,
+  onClose,
+}: {
+  open: boolean;
+  context: BookingContext;
+  initialDate?: string | null;
+  /** Start with this client picked, from the Clients screen. */
+  initialClientId?: string | null;
+  onClose: () => void;
+}) {
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="md:w-[560px]">
@@ -29,22 +42,23 @@ export function BookSheet({ open, context, initialDate, onClose }: { open: boole
           <SheetTitle>New appointment</SheetTitle>
           <SheetDescription>Client, pet, service, time. Booked as soon as you save.</SheetDescription>
         </SheetHeader>
-        {open && <Form key={initialDate ?? 'x'} context={context} initialDate={initialDate ?? null} onDone={onClose} />}
+        {open && <Form key={`${initialDate ?? 'x'}-${initialClientId ?? 'x'}`} context={context} initialDate={initialDate ?? null} initialClientId={initialClientId ?? null} onDone={onClose} />}
       </SheetContent>
     </Sheet>
   );
 }
 
-function Form({ context, initialDate, onDone }: { context: BookingContext; initialDate: string | null; onDone: () => void }) {
+function Form({ context, initialDate, initialClientId, onDone }: { context: BookingContext; initialDate: string | null; initialClientId: string | null; onDone: () => void }) {
   const router = useRouter();
   const opens = toMinutes(BUSINESS.opens);
   const closes = toMinutes(BUSINESS.closes);
-  const [q, setQ] = useState('');
-  const [clientId, setClientId] = useState<string | null>(null);
+  const preset = initialClientId ? context.clients.find((c) => c.id === initialClientId) ?? null : null;
+  const [q, setQ] = useState(preset?.name ?? '');
+  const [clientId, setClientId] = useState<string | null>(preset?.id ?? null);
   const [newPhone, setNewPhone] = useState('');
-  const [petId, setPetId] = useState<string | null>(null);
+  const [petId, setPetId] = useState<string | null>(preset && preset.pets.length === 1 ? preset.pets[0].id : null);
   const [newPet, setNewPet] = useState('');
-  const [size, setSize] = useState<Size>('medium');
+  const [size, setSize] = useState<Size>(preset && preset.pets.length === 1 ? preset.pets[0].size : 'medium');
   const [serviceId, setServiceId] = useState<string>('full');
   const [date, setDate] = useState<string>(initialDate ?? context.today);
   const [start, setStart] = useState<number | null>(null);
