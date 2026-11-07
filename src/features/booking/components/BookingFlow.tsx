@@ -337,7 +337,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
           <dt className="text-muted-foreground">Takes</dt><dd className="text-right font-semibold">{service ? formatDuration(minutes) : '–'}</dd>
           <dt className="text-muted-foreground">When</dt><dd className="text-right font-semibold">{when ?? '–'}</dd>
           <dt className="text-muted-foreground">Pet</dt><dd className="text-right font-semibold">{petName || '–'}</dd>
-          <dt className="text-muted-foreground">Price</dt><dd className="text-right font-semibold tabular-nums">{service ? `${price}` : '–'}</dd>
+          <dt className="text-muted-foreground">Price</dt><dd className="text-right font-semibold tabular-nums">{service ? `$${price}` : '–'}</dd>
         </dl>
         {step !== 'done' && (
           <div className="flex flex-col gap-2 border-t pt-3">
