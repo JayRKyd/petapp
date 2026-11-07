@@ -36,10 +36,6 @@ export default async function BookPage() {
       </header>
 
       <main className="mx-auto w-full max-w-[430px] flex-1 md:max-w-[1500px] md:px-[6vw] md:py-8">
-        <div className="hidden md:mb-6 md:block">
-          <h1 className="font-display text-3xl font-bold">Book a groom</h1>
-          <p className="mt-1 text-muted-foreground">Pick a service and a time that suits you. No account needed; pay when you collect your pet.</p>
-        </div>
         <div className="md:grid md:grid-cols-[minmax(0,1fr)_340px] md:items-start md:gap-8">
           <BookingFlow availability={availability} />
         </div>
