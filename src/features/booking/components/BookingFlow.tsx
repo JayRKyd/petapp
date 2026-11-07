@@ -137,7 +137,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
           </div>
         )}
 
-        <div className="flex flex-1 flex-col gap-5 px-5 pb-5 md:px-7 md:pb-7">
+        <div className="flex flex-1 flex-col gap-5 px-5 pb-5 md:px-8 md:pb-8">
           {step === 'service' && (
             <>
               <h1 className="text-2xl font-semibold">What does your pet need?</h1>
@@ -161,7 +161,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-bold text-muted-foreground">Service</div>
-                <div className="grid gap-2.5 md:grid-cols-2" role="radiogroup" aria-label="Service">
+                <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3" role="radiogroup" aria-label="Service">
                   {SERVICES.map((s) => (
                     <button
                       key={s.id}
@@ -206,7 +206,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                   </button>
                 </div>
               )}
-              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-7 md:px-7">
+              <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-8 md:px-8">
                 {availability.days.map((d) => {
                   const n = freeCount(d);
                   return (
@@ -231,7 +231,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
               {day ? (
                 <div className="flex flex-col gap-2">
                   <div className="text-xs font-bold text-muted-foreground">{formatDay(day.date)}</div>
-                  <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+                  <div className="grid grid-cols-3 gap-2 md:grid-cols-6 xl:grid-cols-8">
                     {slots.map((s) => (
                       <button
                         key={s.start}
@@ -266,7 +266,7 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                 <ChevronLeft className="size-4" /> Change time
               </button>
               <h1 className="text-2xl font-semibold">Your details</h1>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <Field label="Your name" id="b-name" error={tried && name.trim().length < 2 ? 'Enter your name' : null}>
                   <Input id="b-name" className="h-11" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
                 </Field>

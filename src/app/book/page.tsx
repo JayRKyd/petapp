@@ -20,7 +20,7 @@ export default async function BookPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="hidden border-b bg-card md:block">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-6 px-6 py-4">
+        <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between gap-6 px-[6vw] py-4">
           <div className="flex items-center gap-3 font-display text-xl font-bold">
             <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground">
               <PawPrint className="size-4" />
@@ -35,18 +35,18 @@ export default async function BookPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[430px] flex-1 md:max-w-5xl md:px-6 md:py-8">
+      <main className="mx-auto w-full max-w-[430px] flex-1 md:max-w-[1500px] md:px-[6vw] md:py-8">
         <div className="hidden md:mb-6 md:block">
           <h1 className="font-display text-3xl font-bold">Book a groom</h1>
           <p className="mt-1 text-muted-foreground">Pick a service and a time that suits you. No account needed; pay when you collect your pet.</p>
         </div>
-        <div className="md:grid md:grid-cols-[minmax(0,1fr)_300px] md:items-start md:gap-6">
+        <div className="md:grid md:grid-cols-[minmax(0,1fr)_340px] md:items-start md:gap-8">
           <BookingFlow availability={availability} />
         </div>
       </main>
 
       <footer className="hidden border-t md:block">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-5 text-sm text-muted-foreground">
+        <div className="mx-auto flex w-full max-w-[1500px] flex-wrap items-center justify-between gap-3 px-[6vw] py-5 text-sm text-muted-foreground">
           <span>{BUSINESS.name} · {BUSINESS.town}</span>
           <span>{hoursLine()} · {BUSINESS.phone}</span>
         </div>
