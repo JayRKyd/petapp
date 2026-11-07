@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { BUSINESS } from '@/lib/business';
 import { isISODate } from '@/lib/dates';
 import { getAvailability } from './queries';
-import { SIZES, serviceById } from './rules';
+import { SIZES, serviceById, type Size } from './rules';
 import { isFree, toMinutes } from './slots';
-import { createAppointment } from './store';
+import { createAppointment, createClient, createPet, findClientByPhone, listPets } from './store';
 
 const schema = z.object({
   serviceId: z.string(),
@@ -26,14 +26,18 @@ export type BookingResult =
   | { ok: true; code: string }
   | { ok: false; error: string; /** The time went while they were typing: send them back to pick another. */ slotGone?: boolean };
 
-/** A client books from the public page. The slot is checked again here, in case someone else took it meanwhile. */
+/**
+ * A client books from the public page. The slot is checked again here, in
+ * case someone else took it meanwhile. A returning client is matched by phone
+ * number so their pet's record carries over.
+ */
 export async function requestBooking(input: BookingInput): Promise<BookingResult> {
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Check the form' };
   const d = parsed.data;
   const service = serviceById(d.serviceId);
   if (!service) return { ok: false, error: 'Pick a service' };
-  const size = d.size as keyof typeof service.price;
+  const size = d.size as Size;
   if (d.phone.replace(/\D/g, '').length < 7) return { ok: false, error: 'Enter a number we can reach you on' };
 
   const availability = await getAvailability();
@@ -43,6 +47,12 @@ export async function requestBooking(input: BookingInput): Promise<BookingResult
     return { ok: false, error: 'That time was just taken. Pick another one.', slotGone: true };
   }
 
+  const client = (await findClientByPhone(d.phone)) ?? (await createClient({ name: d.name, phone: d.phone }));
+  const pets = await listPets(client.id);
+  const pet =
+    pets.find((p) => p.name.toLowerCase() === d.petName.toLowerCase()) ??
+    (await createPet({ clientId: client.id, name: d.petName, breed: d.breed || null, size, notes: null }));
+
   const appointment = await createAppointment({
     date: d.date,
     start: d.start,
@@ -50,11 +60,10 @@ export async function requestBooking(input: BookingInput): Promise<BookingResult
     serviceId: service.id,
     size,
     price: service.price[size],
-    clientName: d.name,
-    phone: d.phone,
-    petName: d.petName,
-    breed: d.breed || null,
+    clientId: client.id,
+    petId: pet.id,
     notes: d.notes || null,
+    status: 'new',
     source: 'online',
   });
   return { ok: true, code: appointment.code };
