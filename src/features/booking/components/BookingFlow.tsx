@@ -207,6 +207,8 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                   </button>
                 </div>
               )}
+              <div className="md:grid md:grid-cols-2 md:items-start md:gap-6">
+              <div>
               <div className="hidden md:block">
                 <MonthCalendar days={availability.days} selected={date} freeCount={freeCount} onPick={(d) => { setDate(d); setStart(null); }} />
               </div>
@@ -232,10 +234,11 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                   );
                 })}
               </div>
+              </div>
               {day ? (
                 <div className="flex flex-col gap-2 md:mt-1">
                   <div className="text-xs font-bold text-muted-foreground">{formatDay(day.date)}</div>
-                  <div className="grid grid-cols-3 gap-2 md:grid-cols-6 xl:grid-cols-8">
+                  <div className="grid grid-cols-3 gap-2 xl:grid-cols-4">
                     {slots.map((s) => (
                       <button
                         key={s.start}
@@ -259,8 +262,9 @@ export function BookingFlow({ availability }: { availability: Availability }) {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Pick a day to see times.</p>
+                <p className="text-sm text-muted-foreground md:mt-1 md:rounded-2xl md:border md:border-dashed md:p-6 md:text-center">Pick a day to see times.</p>
               )}
+              </div>
             </>
           )}
 
