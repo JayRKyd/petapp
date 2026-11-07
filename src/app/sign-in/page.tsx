@@ -3,6 +3,8 @@ import { PawPrint } from 'lucide-react';
 import { BUSINESS } from '@/lib/business';
 import { SignInForm } from './SignInForm';
 
+const OWNER_ROUTES = ['/today', '/schedule', '/clients', '/money'];
+
 export const metadata: Metadata = { title: `Sign in · ${BUSINESS.name}` };
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
@@ -15,7 +17,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         </span>
         {BUSINESS.name}
       </div>
-      <SignInForm next={next && next.startsWith('/') ? next : '/today'} />
+      <SignInForm next={next && OWNER_ROUTES.some((r) => next === r || next.startsWith(r + '/')) ? next : '/today'} />
     </main>
   );
 }
